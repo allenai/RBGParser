@@ -336,6 +336,13 @@ public class SyntacticFeatureFactory implements Serializable {
     	
     	FeatureVector fv = new FeatureVector(numArcFeats);
     	
+	// add a binary feature indicating that h is predicted by a separate model
+	// to be the prepositional phrase head of c.
+	if (inst.ppHeads[c] == h) {
+	    long featureCode = createArcCodeP(PREDICTED_PP_HEADS, 1);
+	    addArcFeature(featureCode, fv);
+	}
+
     	addBasic1OFeatures(fv, inst, h, c, attDist);
     	
     	addCore1OPosFeatures(fv, inst, h, c, attDist);

@@ -351,7 +351,10 @@ public class FeatureTemplate {
 	    HEAD_EMB,
 	    MOD_EMB,
 	    
-	    
+		    /* predicted preposition phrase head
+		    */
+		    PREDICTED_PP_HEADS,
+		    
 	    FEATURE_TEMPLATE_END;
 		
 		public final static int numArcFeatBits = Utils.log2(FEATURE_TEMPLATE_END.ordinal());

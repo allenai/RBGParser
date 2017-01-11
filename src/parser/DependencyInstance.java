@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.UnsupportedOperationException;
 import java.util.*;
 import java.io.*;
 
@@ -48,6 +49,12 @@ public class DependencyInstance implements Serializable {
 	// HEAD: the IDs of the heads for each element
 	public int[] heads;
 
+        // prepositional phrase (PP) attachments, predicted by
+        // another model and read from modified conll files.
+        // this array will have -1 for all non-prepositions, and will
+        // have the predicted head ID for all prepositions.
+        public int[] ppHeads;
+
 	// DEPREL: the dependency relations, e.g. "SUBJ"
 	public String[] deprels;
 	
@@ -70,13 +77,14 @@ public class DependencyInstance implements Serializable {
     	this.forms = forms;
     	this.feats = new String[length][];
     	this.deprels = new String[length];
+	throw new java.lang.UnsupportedOperationException("ppHeads has not been initialized in DependencyInstance(String[] forms).");
     }
     
     public DependencyInstance(String[] forms, String[] postags, int[] heads) {
     	this.length = forms.length;
     	this.forms = forms;    	
     	this.heads = heads;
-	    this.postags = postags;
+	this.postags = postags;
     }
     
     public DependencyInstance(String[] forms, String[] postags, int[] heads, String[] deprels) {
@@ -85,7 +93,13 @@ public class DependencyInstance implements Serializable {
     }
 
     public DependencyInstance(String[] forms, String[] lemmas, String[] cpostags, String[] postags,
-            String[][] feats, int[] heads, String[] deprels) {
+			      String[][] feats, int[] heads, String[] deprels, int[] ppHeads) {
+	this(forms, lemmas, cpostags, postags, feats, heads, deprels);
+	this.ppHeads = ppHeads;
+    }
+
+    public DependencyInstance(String[] forms, String[] lemmas, String[] cpostags, String[] postags,
+			      String[][] feats, int[] heads, String[] deprels) {
     	this(forms, postags, heads, deprels);
     	this.lemmas = lemmas;    	
     	this.feats = feats;
@@ -105,6 +119,7 @@ public class DependencyInstance implements Serializable {
     	deplbids = a.deplbids;
     	featids = a.featids;
     	wordVecIds = a.wordVecIds;
+	ppHeads = a.ppHeads;
     }
     
     //public void setDepIds(int[] depids) {

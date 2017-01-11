@@ -34,6 +34,7 @@ public class Conll06Reader extends DependencyReader {
 	    String[][] feats = new String[length + 1][];
 	    String[] deprels = new String[length + 1];
 	    int[] heads = new int[length + 1];
+	    int[] ppHeads = new int[length + 1];
 	    
 	    forms[0] = "<root>";
 	    lemmas[0] = "<root-LEMMA>";
@@ -41,6 +42,7 @@ public class Conll06Reader extends DependencyReader {
 	    pos[0] = "<root-POS>";
 	    deprels[0] = "<no-type>";
 	    heads[0] = -1;
+	    ppHeads[0] = -1;
 	    
 	    boolean hasLemma = false;
 	    
@@ -65,10 +67,18 @@ public class Conll06Reader extends DependencyReader {
 	    	if (!parts[5].equals("_")) feats[i] = parts[5].split("\\|");
 	    	heads[i] = Integer.parseInt(parts[6]);
 	    	deprels[i] = (/*options.learnLabel &&*/ isLabeled) ? parts[7] : "<no-type>";
+
+		// We're using parts[8] (i.e., the nineth field titled PHEAD) to indicate
+		// predicted prepositional phrase heads, when available.
+		if (parts[8].startsWith("ppHead=")) {
+		    ppHeads[i] = Integer.parseInt(parts[8].substring("ppHead=".length()));
+		} else {
+		    ppHeads[i] = -1;
+		}
 	    }
 	    if (!hasLemma) lemmas = null;
 	    
-		return new DependencyInstance(forms, lemmas, cpos, pos, feats, heads, deprels);
+	    return new DependencyInstance(forms, lemmas, cpos, pos, feats, heads, deprels, ppHeads);
 	}
 
 	@Override
