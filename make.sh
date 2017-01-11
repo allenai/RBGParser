@@ -2,7 +2,7 @@
 
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:."
 
-JNI_PATH="jni_include"
+JNI_PATH="/System/Library/Frameworks/JavaVM.framework/Headers/"
 
 javac -d bin -sourcepath src -classpath "lib/trove.jar" src/parser/DependencyParser.java
 
