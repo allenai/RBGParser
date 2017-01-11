@@ -70,8 +70,8 @@ public class Conll06Reader extends DependencyReader {
 
 		// We're using parts[8] (i.e., the nineth field titled PHEAD) to indicate
 		// predicted prepositional phrase heads, when available.
-		if (parts[8].startsWith("ppHead=")) {
-		    ppHeads[i] = Integer.parseInt(parts[8].substring("ppHead=".length()));
+		if (parts.length == 11 && !parts[10].equals("_")) {
+		    ppHeads[i] = Integer.parseInt(parts[10]);
 		} else {
 		    ppHeads[i] = -1;
 		}
