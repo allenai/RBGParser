@@ -1,22 +1,20 @@
 from collections import namedtuple
 
-print('before defining Instance')
+new_system = 'gold'
 
-Instance = namedtuple('Instance', 'children_words heads_words gold_head_word ontolstm_head_word preps_words'.split(' '), verbose=True)
-
-print('before defining read_one_preposition_per_line')
+Instance = namedtuple('Instance', 'children_words heads_words gold_head_word new_system_head_word preps_words'.split(' '), verbose=True)
 
 # load the data scattered in different files, one preposition per line.
 def read_one_preposition_per_line(children_words_filename,
                                   heads_words_filename,
                                   labels_filename,
-                                  ontolstm_predictions_filename,
+                                  new_system_predictions_filename,
                                   preps_words_filename):
   instances=[]
   with open(children_words_filename) as children_words_file, \
           open(heads_words_filename) as heads_words_file, \
           open(labels_filename) as labels_file, \
-          open(ontolstm_predictions_filename) as ontolstm_predictions_file, \
+          open(new_system_predictions_filename) as new_system_predictions_file, \
           open(preps_words_filename) as preps_words_file:
     while True:
       heads_words_line = heads_words_file.readline().strip()
@@ -25,7 +23,7 @@ def read_one_preposition_per_line(children_words_filename,
       instance = Instance(children_words=children_words_file.readline().strip(), \
                             heads_words=heads_words, \
                             gold_head_word=heads_words[int(labels_file.readline().strip())-1], \
-                            ontolstm_head_word=heads_words[int(ontolstm_predictions_file.readline().strip())-1], \
+                            new_system_head_word=heads_words[int(new_system_predictions_file.readline().strip())-1], \
                             preps_words=preps_words_file.readline().strip())
       instances.append(instance)
   return instances
@@ -34,14 +32,14 @@ print('before defining train_instances')
 train_instances = read_one_preposition_per_line("wsj.2-21.txt.dep.pp.children.words",
                                                 "wsj.2-21.txt.dep.pp.heads.words",
                                                 "wsj.2-21.txt.dep.pp.labels",
-                                                "wsj.2-21.txt.dep.pp.ontolstm.predictions",
+                                                "wsj.2-21.txt.dep.pp." + new_system + ".predictions",
                                                 "wsj.2-21.txt.dep.pp.preps.words")
 
 print('before defining test_instances')
 test_instances = read_one_preposition_per_line("wsj.23.txt.dep.pp.children.words",
                                                 "wsj.23.txt.dep.pp.heads.words",
                                                 "wsj.23.txt.dep.pp.labels",
-                                                "wsj.23.txt.dep.pp.ontolstm.predictions",
+                                                "wsj.23.txt.dep.pp." + new_system + ".predictions",
                                                 "wsj.23.txt.dep.pp.preps.words")
 
 print('before defining get_instance_indeices')
@@ -77,8 +75,8 @@ yonatan_conll_filenames = ['wsj.2-21.txt.dep.pp.yonatan.predictions.conll',
 print('before processing conll files')
 for conll_filename in yonatan_conll_filenames:
   instances = train_instances if conll_filename.startswith('wsj.2-21') else test_instances 
-  ontolstm_conll_filename = conll_filename.replace('yonatan', 'ontolstm')
-  with open(conll_filename) as conll_file, open(ontolstm_conll_filename, mode='w') as ontolstm_conll_file:
+  new_system_conll_filename = conll_filename.replace('yonatan', new_system)
+  with open(conll_filename) as conll_file, open(new_system_conll_filename, mode='w') as new_system_conll_file:
     sent_buffer = []
     preps_counter = -1
     for line in conll_file:
@@ -89,7 +87,7 @@ for conll_filename in yonatan_conll_filenames:
         # process sentence.
         for token_index, token_line in enumerate(sent_buffer):
           if token_line.endswith('_'): 
-            ontolstm_conll_file.write(token_line + '\n')
+            new_system_conll_file.write(token_line + '\n')
             continue
           preps_counter += 1
           fields = token_line.split('\t')
@@ -113,17 +111,17 @@ for conll_filename in yonatan_conll_filenames:
                                              gold_head_word, 
                                              heads_words_candidates)
           # write next prediction.
-          ontolstm_head_word = instances[preps_counter].ontolstm_head_word.lower()
-          ontolstm_head_id = None
+          new_system_head_word = instances[preps_counter].new_system_head_word.lower()
+          new_system_head_id = None
           for head_index in reversed(range(0, token_index)):
-            if sent_buffer[head_index].split('\t')[1].lower() == ontolstm_head_word:
-              ontolstm_head_id = head_index + 1
-          if ontolstm_head_id == None:
-            print('ERROR: couldn\'t find the head word predicted by ontolstm in the same sentence')
+            if sent_buffer[head_index].split('\t')[1].lower() == new_system_head_word:
+              new_system_head_id = head_index + 1
+          if new_system_head_id == None:
+            print('ERROR: couldn\'t find the head word predicted by new_system in the same sentence')
             import pdb; pdb.set_trace()
             assert(False)
-          # replace yonatan's prediction with ontolstm prediction.
-          fields[-1] = str(ontolstm_head_id)
-          ontolstm_conll_file.write('\t'.join(fields) + '\n')
+          # replace yonatan's prediction with new_system prediction.
+          fields[-1] = str(new_system_head_id)
+          new_system_conll_file.write('\t'.join(fields) + '\n')
         sent_buffer.clear()
-        ontolstm_conll_file.write('\n')
+        new_system_conll_file.write('\n')
