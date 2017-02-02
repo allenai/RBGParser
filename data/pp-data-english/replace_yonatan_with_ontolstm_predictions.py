@@ -75,7 +75,7 @@ yonatan_conll_filenames = ['wsj.2-21.txt.dep.pp.yonatan.predictions.conll',
 print('before processing conll files')
 for conll_filename in yonatan_conll_filenames:
   instances = train_instances if conll_filename.startswith('wsj.2-21') else test_instances 
-  new_system_conll_filename = conll_filename.replace('yonatan', new_system)
+  new_system_conll_filename = conll_filename.replace('yonatan', new_system) + '.fix'
   with open(conll_filename) as conll_file, open(new_system_conll_filename, mode='w') as new_system_conll_file:
     sent_buffer = []
     preps_counter = -1
@@ -94,8 +94,6 @@ for conll_filename in yonatan_conll_filenames:
           assert(token_index == int(fields[0])-1)
           preps_words = fields[1].lower()
           gold_head_word = sent_buffer[int(fields[6])-1].split('\t')[1].lower()
-          #if preps_counter == 22:
-          #  import pdb; pdb.set_trace()
           children_words_candidates = [sent_buffer[i].split('\t')[1].lower() \
                                            for i \
                                            in range(token_index+1, len(sent_buffer))]
@@ -103,8 +101,6 @@ for conll_filename in yonatan_conll_filenames:
                                         for i \
                                         in range(0, token_index)]
           # instead of searching for a comatible index, check instances[preps_counter].
-          # if it doesn't fit the bill, check instances[preps_counter+1] ...etc.
-          # until you find one that matches.
           preps_counter = get_instance_index(instances,
                                              preps_counter,
                                              preps_words, 
@@ -116,6 +112,7 @@ for conll_filename in yonatan_conll_filenames:
           for head_index in reversed(range(0, token_index)):
             if sent_buffer[head_index].split('\t')[1].lower() == new_system_head_word:
               new_system_head_id = head_index + 1
+              break
           if new_system_head_id == None:
             print('ERROR: couldn\'t find the head word predicted by new_system in the same sentence')
             import pdb; pdb.set_trace()
